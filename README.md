@@ -67,3 +67,49 @@ UEngine上就剩下一个GEngine了，也就是根源了。至此，ue游戏世�
 Object->Actor+Component->Level->World->WorldContext->GameInstance->Engine。
 
 ### pawn
+
+#### Component
+
+让我们再来看看这个component这个对象树最底层的东西，Component实现的是功能，我过去常常分不清什么是功能，什么是业务逻辑。这样说，Component实现的东西应该是可以无痛迁移到下一个游戏的，例如MovementComponent,它是一种游戏功能。什么是业务逻辑呢？所谓的游戏业务逻辑，实际上编写的就是该如何对玩家的输入提供反馈.这就很有意思，假如我按了B,我的背包会出现，这种就是游戏业务逻辑，它也是无法迁移到下一个游戏的。
+
+#### Pawn
+
+回到pawn,pawn就是可以移动的actor.它定义了三种基本的模板方法接口。
+
+- 可被Controller控制
+- PhysicsCollision表示
+- MovementInput的基本响应接口
+
+Pawn既然继承自Actor,那么它也就着重于在3d世界中表示，而不是被当成逻辑的载体，大钊的比喻非常巧妙，>  你也可以想象成提线木偶，那个木偶就是Pawn，而提线的是Controller .这下可以明白逻辑这类应该写在Controller之中会比较好。
+
+Pawn可以响应输入，是因为其实在Actor里面就可以响应输入了，但响应后 的逻辑控制，这就是Pawn新加的内容，定义了响应移动的接口，之后的逻辑就交给了MovementComponent了。
+
+![1712641912888](image/README/1712641912888.png)
+
+#### ADefaultPawn
+
+继承自Pawn的ADefaultPawn自带三件套，DefaultPawnMovementComponent、spherical CollisionComponent和StaticMeshComponent。不用每次都去手动的添加这些组件。
+
+#### SpectatorPawn
+
+可以看到它只有一个USpectatorPawnMovement（不带重力漫游），他就是FPS游戏中的观战系统。
+
+#### ACharacter
+
+同样的三件套，不同的配方罢了
+
+### Controller
+
+#### Acontroller
+
+AController,继承自AActor,主要表达控制的概念，也就是写业务逻辑的地方，这很容易和pawn的逻辑搞混，哪些应该写在pawn,哪些应该写在controller里面呢？
+
+主要还是看他们二者的概念上，pawn表达了能动，重点在能上面。controller表达了控制，重点是控制。我想可以表达自身能的东西放到pawn里里面，如碰撞检测，移动，播放动画的能力。controller则是控制，对于每一个pawn都使用的逻辑放在它身上。在战争游戏中，假设说有坦克和卡车两种战车（Pawn），只有坦克可以开炮，那么开炮这个功能你就可以直接实现在坦克Pawn上。而这两辆战车都有的自动寻找攻击目标功能，就可以实现在一个Controller里。可以看到controller里面是使用于所有的pawn的逻辑。
+
+还例如，controller里面应该存放独立于pawn的数据，以便控制pawn的生死等。
+
+所以分级一下，component>controller>pawn,功能应该在层级上这样划分。适用于多个游戏的>使用于多个pawn>使用于单个pawn的
+
+#### AplayerState
+
+AplayerState继承自Ainfo,它很简洁。且它是自动生成的。所以在切换关卡的时候会自动释放。基于这些特性，它应该存放着哪些数据呢？应该是玩家在本关卡的游玩数据。假如你这个关卡是个篮球比赛，那么各个玩家的得分就记录在AplayerState上面，且每一个玩家应该都有一个Aplayerstate。你希望一些数据只在本关卡有用，那么就写在那里吧。
