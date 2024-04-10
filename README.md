@@ -113,3 +113,37 @@ AController,继承自AActor,主要表达控制的概念，也就是写业务逻�
 #### AplayerState
 
 AplayerState继承自Ainfo,它很简洁。且它是自动生成的。所以在切换关卡的时候会自动释放。基于这些特性，它应该存放着哪些数据呢？应该是玩家在本关卡的游玩数据。假如你这个关卡是个篮球比赛，那么各个玩家的得分就记录在AplayerState上面，且每一个玩家应该都有一个Aplayerstate。你希望一些数据只在本关卡有用，那么就写在那里吧。
+
+#### APlayerController
+
+![1712739094899](image/README/1712739094899.png)
+
+
+关于playercontroller这里依旧是有个老问题,哪些逻辑写在这里合适呢？其实答案同controller一样罢了。
+
+第二个问题是这里面带有些什么呢？
+
+在他的cpp文件中的函数大概可以分成一下几类。
+
+- Camera的管理
+- input系统
+- HUD显示
+- UPlayer关联
+- level切换
+- voice
+
+#### AAIController
+
+![1712739083563](image/README/1712739083563.png)
+
+同PlayerController对比，少了Camera、Input、UPlayer关联，HUD显示，Voice、Level切换接口，但也增加了一些AI需要的组件：
+
+- Navigation，自动寻路系统，也就是move一类的接口
+- AI组件，运行行为树，获取黑板数据等。
+- Task系统，让AI去完成一些任务，也是实现GameplayAbilities系统的一个接口。目前简单来说GameplayAbilities是为Actor添加额外能力。属性集合的一个模块，比如HP，MP等
+
+不同于playercontrol的是，它不是必须存在的。因为可能没有ai。所以我们可以在pawn上给它配置一个AIcontroller,当pawn产生的时候aicontroller就可以产生。
+
+哪么哪些逻辑放在AIController里面呢？
+
+同playerController一样，只不过不同的是，我们尽量将它的功能在其提供的AI组件里面完成
