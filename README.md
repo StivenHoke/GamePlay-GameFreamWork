@@ -32,6 +32,8 @@ PersistentLevel和CurrentLevel只是个快速引用。在编辑器里编辑的�
 
 每一个world都有一个主PersistentLevel，它的意思是关于整个世界的配置可以在主level里的worldsettings里面设置，但是每一个level里面的个性化设置可以到单独的level里面设置。
 
+根据堆persistentLevel的描述我们可以知道，只要切换了PersistentLevel，那么world也会被切换。
+
 ### WorldContext,GameInstance,Engine
 
 #### WorldContext
@@ -118,7 +120,6 @@ AplayerState继承自Ainfo,它很简洁。且它是自动生成的。所以在�
 
 ![1712739094899](image/README/1712739094899.png)
 
-
 关于playercontroller这里依旧是有个老问题,哪些逻辑写在这里合适呢？其实答案同controller一样罢了。
 
 第二个问题是这里面带有些什么呢？
@@ -147,3 +148,30 @@ AplayerState继承自Ainfo,它很简洁。且它是自动生成的。所以在�
 哪么哪些逻辑放在AIController里面呢？
 
 同playerController一样，只不过不同的是，我们尽量将它的功能在其提供的AI组件里面完成
+
+### GameMode&&GameState
+
+#### GameMode
+
+什么是GameMode呢？根据ue的设计理念，既然actor有了可以控制它的controller,那么我的World自然也是想的，不过不叫worldcontorller。而是GameMode.
+
+![1712994535946](image/README/1712994535946.png)
+
+可以看到它继承自Ainfo,因为它贪图actor的某些特性，又嫌弃渲染等一些功能，所以这个干净的Ainfo自然便是它的娘了。
+
+作为游戏唯一逻辑的操作者，它的功能分为下面这几类
+
+- class登记
+- 游戏内实体的spawn
+- level的切换
+- 多人游戏的步调同步
+
+关于GameMode的存在周期，其实它应该是存在于一个world的，也就是切换world的时候它会被释放掉，且它也是唯一的，至始至终都是persistentlevel的那个。
+
+哪些逻辑应该写在GameWorld里面，哪些逻辑应该写在关卡蓝图里面呢?
+
+在概念上，level是“表示”，world是“逻辑”，既然是这样，那么一个区域的重力，触发特效应该写在这个区域。相反，使用于所有区域的逻辑应该是写在gamemode里面了。
+
+#### GameState
+
+同playerstate这种保存玩家游戏数据的相比，它保存的应该是一个游戏的状态数据，如任务数据等等。所以在我的demo中的acceptedquest数组应该是保存在gamestate当中的。
